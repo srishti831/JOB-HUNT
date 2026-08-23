@@ -12,7 +12,7 @@ import { User2, LogOut } from "lucide-react";
 export const Navbar = () => {
   const user = false;
   return (
-    <div classname="bg-white">
+    <div className="bg-white">
       <div className="flex item-center justify-between mx-auto max-w-7xl h-16">
         <div>
           <h1 className="text-2xl font-bold">
@@ -27,8 +27,9 @@ export const Navbar = () => {
           </ul>
           {!user ? (
             <div className = 'flex items-center gap-2'>
-              <Button variant="outline">Login</Button>
-              <Button className = "bg-[#6a4aa6] hover:bg-[#39176f]">SignUp</Button>
+              <Link to="/login"><Button variant="outline">Login</Button></Link>
+              <Link to = "/signup"><Button className = "bg-[#6a4aa6] hover:bg-[#39176f]">SignUp</Button></Link>
+              
             </div>
           ) : (
             <Popover>
@@ -76,3 +77,7 @@ export const Navbar = () => {
     </div>
   );
 };
+
+
+
+
