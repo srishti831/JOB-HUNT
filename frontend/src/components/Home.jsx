@@ -2,7 +2,7 @@ import React from 'react'
 
 import HeroSection from './HeroSection'
 import { Navbar } from './shared/Navbar'
-import CategoryCaraousel from './CategoryCaraousel'
+import CategoryCarousel from './CategoryCarousel'
 
 const Home = () => {
   return (
@@ -10,7 +10,7 @@ const Home = () => {
         <Navbar/>
         <HeroSection/>
 
-         <CategoryCaraousel/>
+         <CategoryCarousel/>
         {/* <LatestJobs/> */}
         {/* <Footer/>  */}
     </div>
