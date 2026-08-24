@@ -1,10 +1,18 @@
 import React from 'react'
-import {Navbar} from "./shared/Navbar"
+
+import HeroSection from './HeroSection'
+import { Navbar } from './shared/Navbar'
+import CategoryCaraousel from './CategoryCaraousel'
 
 const Home = () => {
   return (
     <div>
         <Navbar/>
+        <HeroSection/>
+
+         <CategoryCaraousel/>
+        {/* <LatestJobs/> */}
+        {/* <Footer/>  */}
     </div>
   )
 }
