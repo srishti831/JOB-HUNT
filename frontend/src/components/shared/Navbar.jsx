@@ -15,7 +15,7 @@ export const Navbar = () => {
     <div className="bg-white">
       <div className="flex item-center justify-between mx-auto max-w-7xl h-16">
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold items-center">
             Job<span className="text-[#d40d0d]">Portal</span>
           </h1>
         </div>
