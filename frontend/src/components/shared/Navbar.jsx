@@ -59,9 +59,8 @@ export const Navbar = () => {
               <PopoverTrigger asChild>
                 <Avatar className="curson-pointer">
                   <AvatarImage
-                    src="https://github.com/shadcn.png"
+                    src={user?.profile?.profilePhoto}
                     alt="@shadcn"
-                    className="grayscale"
                   />
                 </Avatar>
               </PopoverTrigger>
@@ -69,7 +68,7 @@ export const Navbar = () => {
                 <div className="flex gap-4 space-y-2">
                   <Avatar className="curson-pointer">
                     <AvatarImage
-                      src="https://github.com/shadcn.png"
+                      src={user?.profile?.profilePhoto}
                       alt="@shadcn"
 
                     />
@@ -77,7 +76,7 @@ export const Navbar = () => {
                   <div>
                     <h4 className="font-medium">{user?.fullname}</h4>
                     <p className="text - sm text-muted-foreground">
-                      This is my profile
+                      {user?.profile?.bio}
                     </p>
                   </div>
                 </div>

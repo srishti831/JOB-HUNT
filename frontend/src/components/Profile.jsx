@@ -9,11 +9,11 @@ import AppliedJobTable from './AppliedJobTable'
 import UpdateProfileDialog from './UpdateProfileDialog'
 import { useSelector } from 'react-redux'
 
-const isResume = true;
-
 const Profile = () => {
   const [open, setOpen] = useState(false);
   const { user } = useSelector(store => store.auth);
+
+  const isResume = !!user?.profile?.resume;
 
   return (
     <div>
@@ -78,7 +78,7 @@ const Profile = () => {
                 href={user?.profile?.resume}
                 className="text-blue-500 w-full hover:underline cursor-pointer"
               >
-                {user?.profile?.resumeOriginalName}
+                {user?.fullname}.pdf
               </a>
             ) : (
               <span>NA</span>
@@ -98,4 +98,3 @@ const Profile = () => {
 }
 
 export default Profile
-

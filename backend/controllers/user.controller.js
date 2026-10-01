@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import path from "path";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 
@@ -34,10 +35,10 @@ export const register = async (req, res) => {
       phoneNumber,
       password: hashedPassword,
       role,
-      profile:{
+      profile: {
         profilePhoto: cloudResponse.secure_url,
-        profilePhotoOriginalName: file.originalname
-      }
+        profilePhotoOriginalName: file.originalname,
+      },
     });
 
     return res.status(201).json({
@@ -46,6 +47,10 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({
+      message: error.message || "Something went wrong while registering",
+      success: false,
+    });
   }
 };
 
@@ -135,42 +140,37 @@ export const updateProfile = async (req, res) => {
     let cloudResponse;
 
     if (file) {
-    console.log("FILE RECEIVED:", {
+      console.log("FILE RECEIVED:", {
         originalname: file.originalname,
         mimetype: file.mimetype,
-        size: file.size
-    });
+        size: file.size,
+      });
 
-    const fileUri = getDataUri(file);
+      const fileUri = getDataUri(file);
 
-    console.log("UPLOADING TO CLOUDINARY...");
+      const baseName = path
+        .parse(file.originalname).name
+        .replace(/\s+/g, "_");
 
-    try {
-        cloudResponse = await cloudinary.uploader.upload(
-            fileUri.content,
-            {
-                resource_type: "raw"
-            }
-        );
+      console.log("UPLOADING TO CLOUDINARY...");
 
-        console.log("CLOUDINARY RESPONSE:", cloudResponse);
+      try {
+        cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
+          resource_type: "auto",
+          public_id: `resumes/${Date.now()}-${baseName}`,
+        });
 
-    } catch (cloudinaryError) {
+        console.log("CLOUDINARY RESPONSE:", cloudResponse.secure_url);
+      } catch (cloudinaryError) {
         console.log("========== CLOUDINARY ERROR ==========");
         console.log("message:", cloudinaryError.message);
-        console.log("http_code:", cloudinaryError.http_code);
-        console.log("name:", cloudinaryError.name);
-        console.log("error:", cloudinaryError);
-        console.log("======================================");
 
         throw cloudinaryError;
+      }
     }
-}
 
-    let skillsArray;
-    if (skills) skillsArray = skills.split(",");
     const userId = req.id;
-    
+
     let user = await User.findById(userId);
     if (!user) {
       return res.status(400).json({
@@ -183,7 +183,7 @@ export const updateProfile = async (req, res) => {
     if (email) user.email = email;
     if (phoneNumber) user.phoneNumber = phoneNumber;
     if (bio !== undefined) {
-    user.profile.bio = bio;
+      user.profile.bio = bio;
     }
     if (skills) {
       user.profile.skills = skills
@@ -192,14 +192,11 @@ export const updateProfile = async (req, res) => {
         .filter(Boolean);
     }
 
-
-    //resume comes later here ....
-    if(cloudResponse){
-      user.profile.resume = cloudResponse.secure_url
-      user.profile.resumeOriginalName = file.originalname
+    if (cloudResponse) {
+      user.profile.resume = cloudResponse.secure_url;
+      user.profile.resumeOriginalName = file.originalname;
     }
 
-    
     await user.save();
 
     user = {
@@ -218,8 +215,8 @@ export const updateProfile = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-        message: error.message || "Something went wrong while updating profile",
-        success: false,
+      message: error.message || "Something went wrong while updating profile",
+      success: false,
     });
-}
+  }
 };
