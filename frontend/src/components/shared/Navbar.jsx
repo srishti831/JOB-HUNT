@@ -8,11 +8,32 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User2, LogOut } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch , useSelector } from "react-redux";
+import { setUser } from "@/redux/authSlice";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { USER_API_END_POINT } from "@/utils/constant";
+import { toast } from "sonner";
 
 export const Navbar = () => {
 
   const {user} = useSelector(store => store.auth)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const logoutHandler = async ()=>{
+    try{
+      const res = await axios.get(`${USER_API_END_POINT}/logout` , {withCredentials:true});
+      if(res.data.success){
+        dispatch(setUser(null));
+        navigate("/");
+        toast.success(res.data.message);
+      }
+    }
+    catch(error){
+      console.log(error);
+      toast.error(error.reponse.data.message);
+    }
+  }
   return (
     <div className="bg-white">
       <div className="flex item-center justify-between mx-auto max-w-7xl h-16">
@@ -54,7 +75,7 @@ export const Navbar = () => {
                     />
                   </Avatar>
                   <div>
-                    <h4 className="font-medium">Srishti Singh</h4>
+                    <h4 className="font-medium">{user?.fullname}</h4>
                     <p className="text - sm text-muted-foreground">
                       This is my profile
                     </p>
@@ -68,7 +89,7 @@ export const Navbar = () => {
 
                   <div className="flex w-fit items-center gap-2 cursor-pointer">
                     <LogOut/>
-                    <Button variant="link">Logout</Button>
+                    <Button onClick= {logoutHandler} variant="link">Logout</Button>
                   </div>
                 </div>
               </PopoverContent>
