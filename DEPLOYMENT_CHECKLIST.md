@@ -1,11 +1,1 @@
-# Before you go live
-- [ ] Rotate the secrets you shared while developing (MongoDB password, Cloudinary API secret, JWT `SECRET_KEY`) and put the new ones only in the hosting dashboard.
-- [ ] `SECRET_KEY` is 32+ random characters (the server refuses to start in production with a weak one).
-- [ ] `backend/.env` is NOT in this zip (it is git-ignored). Copy your own or create it from `.env.example`.
-- [ ] MongoDB Atlas: network access allows your host.
-- [ ] `NODE_ENV=production` on the server.
-- [ ] Split hosting? -> `CROSS_SITE_COOKIE=true` + `FRONTEND_URL=<frontend url>` on the backend, `VITE_API_URL=<backend url>` on the frontend.
-- [ ] Existing database from an older version? Read "Upgrading existing data" in the README (lower-case emails, duplicate applications).
-- [ ] `npm test` passes.
-- [ ] `GET /api/health` returns `{"status":"ok","db":"up"}`.
-- [ ] Sign up one recruiter + one student and test: create company -> post job -> save job -> apply -> accept/reject -> withdraw / delete job.
+
