@@ -3,6 +3,7 @@ services:
   - type: web
     name: job-hunt
     runtime: node
+    plan: free
     buildCommand: npm run build
     startCommand: npm start
     healthCheckPath: /api/health
