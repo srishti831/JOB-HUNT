@@ -21,7 +21,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     phoneNumber: user?.phoneNumber || "",
    
     bio: user?.profile?.bio || "",
-    skills: user?.profile?.skills?.map(skill => skill) || "",
+    skills: user?.profile?.skills?.join(", ") || "",
     file: null
   });
 
@@ -40,6 +40,10 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
   const submitHandler =  async (e) => {
 
     e.preventDefault();
+    if (input.file && input.file.size > 5 * 1024 * 1024) {
+      toast.error("Resume must be smaller than 5 MB");
+      return;
+    }
     const formData = new FormData();
     formData.append("fullname", input.fullname);
     formData.append("email", input.email);
@@ -58,8 +62,6 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         withCredentials: true
     });
 
-    console.log("SUCCESS RESPONSE:", res.data);
-
     if(res.data.success){
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
@@ -68,7 +70,6 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     }
    } catch(error){
       console.log(error);
-      console.log("SERVER RESPONSE:", error?.response?.data);
        toast.error(
         error?.response?.data?.message || "Something went wrong"
       );

@@ -1,17 +1,23 @@
 import React, { useState } from 'react'
 import { Navbar } from './shared/Navbar'
-import { Avatar, AvatarImage } from './ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { Button } from './ui/button'
 import { Contact, Mail, Pen } from 'lucide-react'
 import { Badge } from './ui/badge'
 import { Label } from './ui/label'
 import AppliedJobTable from './AppliedJobTable'
 import UpdateProfileDialog from './UpdateProfileDialog'
+import SavedJobs from './SavedJobs'
 import { useSelector } from 'react-redux'
+import { Navigate } from 'react-router-dom'
+import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
 
 const Profile = () => {
+  useGetAppliedJobs();
   const [open, setOpen] = useState(false);
   const { user } = useSelector(store => store.auth);
+
+  if (!user) return <Navigate to="/login" replace />;
 
   const isResume = !!user?.profile?.resume;
 
@@ -19,11 +25,12 @@ const Profile = () => {
     <div>
       <Navbar />
 
-      <div className="max-w-4xl mx-auto border border-gray-200 rounded-2xl my-5 p-8">
+      <div className="max-w-4xl mx-auto border border-gray-200 rounded-2xl my-5 p-4 md:p-8">
         <div className="flex justify-between">
           <div className='flex items-center gap-4'>
             <Avatar className="h-24 w-24">
-              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarImage src={user?.profile?.profilePhoto} />
+              <AvatarFallback>{user?.fullname?.[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
 
             <div>
@@ -56,7 +63,7 @@ const Profile = () => {
         <div className="my-5">
           <h1>Skills</h1>
 
-          <div className='flex items-center gap-1'>
+          <div className='flex flex-wrap items-center gap-1'>
             {
               user?.profile?.skills?.length != 0
                 ? user?.profile?.skills?.map((item, index) => (
@@ -78,7 +85,7 @@ const Profile = () => {
                 href={user?.profile?.resume}
                 className="text-blue-500 w-full hover:underline cursor-pointer"
               >
-                {user?.fullname}.pdf
+                {user?.profile?.resumeOriginalName || `${user?.fullname}.pdf`}
               </a>
             ) : (
               <span>NA</span>
@@ -87,10 +94,12 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl px-4">
         <h1 className="font-bold text-lg my-5">Applied Jobs</h1>
         <AppliedJobTable />
       </div>
+
+      <SavedJobs />
 
       <UpdateProfileDialog open={open} setOpen={setOpen} />
     </div>

@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import { Navbar } from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -11,7 +11,6 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import { setloading, setUser } from "@/redux/authSlice";
-import { setupListeners } from "@reduxjs/toolkit/query";
 
 const Login = () => {
   const [input, setInput] = useState({
@@ -30,7 +29,11 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-   
+
+    if (!input.role) {
+      toast.error("Please select whether you are a student or a recruiter");
+      return;
+    }
 
     try {
       dispatch(setloading(true));
@@ -44,7 +47,7 @@ const Login = () => {
 
       if (res.data.success) {
         dispatch(setUser(res.data.user));
-        navigate("/");
+        navigate(res.data.user?.role === "recruiter" ? "/admin/companies" : "/");
         toast.success(res.data.message);
       }
     } catch (error) {
@@ -58,10 +61,10 @@ const Login = () => {
   return (
     <div>
       <Navbar />
-      <div className="flex items-center justify-center max-w-7xl mx-auto">
+      <div className="flex items-center justify-center max-w-7xl mx-auto px-4">
         <form
           onSubmit={submitHandler}
-          className="w=1/2 border border-gray-200 rounded-md-4 p-4 my-10"
+          className="w-full md:w-1/2 border border-gray-200 rounded-md-4 p-4 my-10"
         >
           <h1 className="font-bold text-xl mb-5">Login</h1>
 
@@ -117,7 +120,7 @@ const Login = () => {
     }
           
           <span className="text-sm">
-            Don't thave an account?{" "}
+            Don't have an account?{" "}
             <Link to="/signup" className="text-blue-600">
               SignUp
             </Link>

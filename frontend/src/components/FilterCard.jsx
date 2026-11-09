@@ -1,11 +1,14 @@
 import React from 'react'
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
+import { Button } from './ui/button';
+import { useDispatch, useSelector } from 'react-redux';
+import { setJobFilters } from '@/redux/jobSlice';
 
 const filterData = [
   {
     filterType: "Location",
-    array: ["Delhi NCR", "Bangalore", "Mumbai", "Pune", "Hyderabad", "Chennai", "Gurgaon", "Noida"],
+    array: ["Delhi NCR", "Bangalore", "Mumbai", "Pune", "Hyderabad", "Chennai"],
   },
   {
     filterType: "Industry",
@@ -38,30 +41,41 @@ const filterData = [
 ];
 
 export const FilterCard = () => {
-    return (
-        <div className = 'w-64  bg-white px-6 py-4 rounded-md'>
-            <h1 className = 'font-bold text-lg text-blue-800'>Filter Jobs</h1>
-            <hr className = 'mt-3'/>
-            <RadioGroup>
-                {
-                    filterData.map((data, index) => (
-                        <div>
-                            <h1 className = "text-lg font-bold">{data.filterType}</h1>
-                            {
-                                data.array.map((item , index) => {
-                                    return (
-                                        <div className = "flex items-center space-x-2 my-2">
-                                            <RadioGroupItem value = {item}/>
-                                            <Label>{item}</Label>
-                                            </div>
-                                    )
-                                })
-                            }
-                            </div>
-                    ))
-        
-                }
-            </RadioGroup>
+  const dispatch = useDispatch();
+  const { jobFilters } = useSelector((store) => store.job);
+  const hasFilters = Object.values(jobFilters || {}).some(Boolean);
+
+  const changeHandler = (type, value) => {
+    dispatch(setJobFilters({ ...jobFilters, [type]: value }));
+  };
+
+  return (
+    <div className='w-full md:w-64 bg-white px-6 py-4 rounded-md'>
+      <div className='flex items-center justify-between'>
+        <h1 className='font-bold text-lg text-blue-800'>Filter Jobs</h1>
+        {hasFilters && (
+          <Button variant="ghost" size="xs" onClick={() => dispatch(setJobFilters({}))}>
+            Clear
+          </Button>
+        )}
+      </div>
+      <hr className='mt-3' />
+      {filterData.map((data) => (
+        <div key={data.filterType} className='mt-3'>
+          <h1 className="text-lg font-bold">{data.filterType}</h1>
+          <RadioGroup
+            value={jobFilters?.[data.filterType] ?? ""}
+            onValueChange={(value) => changeHandler(data.filterType, value)}
+          >
+            {data.array.map((item) => (
+              <Label key={item} className="flex items-center gap-2 my-1 cursor-pointer font-normal">
+                <RadioGroupItem value={item} />
+                {item}
+              </Label>
+            ))}
+          </RadioGroup>
         </div>
-    )
+      ))}
+    </div>
+  )
 }

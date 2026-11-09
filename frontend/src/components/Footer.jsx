@@ -1,10 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
     <footer className="bg-gray-950 text-gray-300">
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
           {/* Brand */}
           <div>
             <div className="mb-4 flex items-center gap-2">
@@ -29,29 +30,13 @@ const Footer = () => {
 
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="/jobs" className="transition hover:text-blue-400">
-                  Browse Jobs
-                </a>
+                <Link to="/jobs" className="transition hover:text-blue-400">Browse Jobs</Link>
               </li>
               <li>
-                <a href="/companies" className="transition hover:text-blue-400">
-                  Explore Companies
-                </a>
+                <Link to="/browse" className="transition hover:text-blue-400">Search Jobs</Link>
               </li>
               <li>
-                <a href="/saved-jobs" className="transition hover:text-blue-400">
-                  Saved Jobs
-                </a>
-              </li>
-              <li>
-                <a href="/applications" className="transition hover:text-blue-400">
-                  My Applications
-                </a>
-              </li>
-              <li>
-                <a href="/profile" className="transition hover:text-blue-400">
-                  My Profile
-                </a>
+                <Link to="/profile" className="transition hover:text-blue-400">My Profile</Link>
               </li>
             </ul>
           </div>
@@ -64,59 +49,13 @@ const Footer = () => {
 
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="/post-job" className="transition hover:text-blue-400">
-                  Post a Job
-                </a>
+                <Link to="/admin/jobs/create" className="transition hover:text-blue-400">Post a Job</Link>
               </li>
               <li>
-                <a href="/candidates" className="transition hover:text-blue-400">
-                  Find Candidates
-                </a>
+                <Link to="/admin/jobs" className="transition hover:text-blue-400">My Jobs</Link>
               </li>
               <li>
-                <a href="/employer/dashboard" className="transition hover:text-blue-400">
-                  Employer Dashboard
-                </a>
-              </li>
-              <li>
-                <a href="/pricing" className="transition hover:text-blue-400">
-                  Pricing
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
-              Company
-            </h3>
-
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a href="/about" className="transition hover:text-blue-400">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="/contact" className="transition hover:text-blue-400">
-                  Contact
-                </a>
-              </li>
-              <li>
-                <a href="/privacy" className="transition hover:text-blue-400">
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a href="/terms" className="transition hover:text-blue-400">
-                  Terms & Conditions
-                </a>
-              </li>
-              <li>
-                <a href="/help" className="transition hover:text-blue-400">
-                  Help Center
-                </a>
+                <Link to="/admin/companies" className="transition hover:text-blue-400">My Companies</Link>
               </li>
             </ul>
           </div>

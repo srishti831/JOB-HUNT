@@ -1,0 +1,17 @@
+{
+  "name": "job-hunt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MERN job portal (students apply, recruiters post jobs)",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm install --prefix backend && npm install --prefix frontend --include=dev && npm run build --prefix frontend",
+    "start": "node backend/index.js",
+    "test": "npm test --prefix backend"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

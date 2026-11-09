@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import { Navbar } from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -35,8 +35,26 @@ const Signup = () => {
   };
 
   const submitHandler = async (e) => {
-    dispatch(setloading(true));
     e.preventDefault();
+
+    if (!input.role) {
+      toast.error("Please select whether you are a student or a recruiter");
+      return;
+    }
+    if (input.password.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+    if (!/^\+?\d{10,15}$/.test(input.phoneNumber.replace(/[\s-]/g, ""))) {
+      toast.error("Please enter a valid phone number (10-15 digits)");
+      return;
+    }
+    if (input.file && input.file.size > 5 * 1024 * 1024) {
+      toast.error("Profile photo must be smaller than 5 MB");
+      return;
+    }
+
+    dispatch(setloading(true));
     const formData = new FormData();
     formData.append("fullname", input.fullname);
     formData.append("email", input.email);
@@ -70,10 +88,10 @@ const Signup = () => {
   return (
     <div>
       <Navbar />
-      <div className="flex items-center justify-center max-w-7xl mx-auto">
+      <div className="flex items-center justify-center max-w-7xl mx-auto px-4">
         <form
           onSubmit={submitHandler}
-          className="w-1/2 border border-gray-200 rounded-md-4 p-4 my-10"
+          className="w-full md:w-1/2 border border-gray-200 rounded-md-4 p-4 my-10"
         >
           <h1 className="font-bold text-xl mb-5">Sign Up</h1>
           <div className="my-2">

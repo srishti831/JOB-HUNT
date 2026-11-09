@@ -1,0 +1,25 @@
+# Render Blueprint – single service: Express serves the API *and* the built React app.
+services:
+  - type: web
+    name: job-hunt
+    runtime: node
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL      # empty => frontend calls the same origin
+        value: ""
+      - key: CROSS_SITE_COOKIE
+        value: "false"
+      - key: MONGO_URI
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CLOUD_NAME
+        sync: false
+      - key: API_KEY
+        sync: false
+      - key: API_SECRET
+        sync: false
