@@ -8,8 +8,6 @@ services:
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: VITE_API_URL      # empty => frontend calls the same origin
         value: ""
       - key: CROSS_SITE_COOKIE
