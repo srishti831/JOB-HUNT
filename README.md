@@ -1,139 +1,227 @@
-# JobPortal (JOB-HUNT)
+JOB-HUNT — Job Portal
+A full-stack job portal built with the MERN stack, where students can discover and apply for jobs while recruiters can manage companies, publish openings, and review applications.
+<p align="left">
+  <a href="https://job-hunt-q6qd.onrender.com"><strong>Live Demo ↗</strong></a>
+</p>Overview
+JOB-HUNT brings the student and recruiter workflows into one application.
+- Students can create an account, build their profile, browse and filter job listings, save jobs, apply, and track application status.
+- Recruiters can register companies, publish jobs for their own companies, view applicants, and update application decisions.
+The application uses a single-service deployment on Render: Express serves both the REST API and the production React build from the same origin.
+Features
+Student
+- Sign up and log in as a student
+- Create and update a profile, including bio and skills
+- Upload a profile photo and PDF resume
+- Browse public job listings and view job details
+- Search by keyword, including job and company information
+- Filter by location, salary, job type, experience, and additional job-text criteria
+- Navigate paginated job results
+- Save and unsave jobs
+- Apply to jobs and view application status
+- Withdraw a pending application
+Recruiter
+- Sign up and log in as a recruiter
+- Register and manage company details, including a company logo
+- Create job listings for companies owned by the signed-in recruiter
+- View jobs posted by the recruiter and their applicant counts
+- Review applicants and their resume links
+- Accept or reject applications
+- Delete a job; its related applications and saved-job references are also cleaned up
+The /admin/... routes in the interface are recruiter-facing management pages. The application has two account roles: student and recruiter; it does not implement a separate super-admin role.
 
-MERN job portal. **Students** sign up, search / filter jobs, save them, apply and track the status.
-**Recruiters** register companies, post jobs, see applicants and accept / reject them.
+Tech Stack
+Layer	Technologies
+Frontend	React 19, Vite, React Router, Redux Toolkit, Redux Persist
+UI	Tailwind CSS v4, Base UI, Lucide
+Backend	Node.js, Express 5
+Database	MongoDB Atlas, Mongoose
+Authentication	JWT stored in an HTTP-only cookie, bcrypt
+File uploads	Multer, Cloudinary
+API communication	Axios
+Testing	Node.js built-in test runner
 
-Stack: React 19 + Vite + Tailwind v4 + shadcn (base-ui) + Redux Toolkit · Node + Express 5 + MongoDB (Mongoose) · Cloudinary · JWT in an httpOnly cookie.
 
-> This is a portfolio / learning project, not a commercial product. Design decisions favour
-> simplicity and readability; the trade-offs are listed honestly under [Limitations](#limitations).
-
-## Features
-
-**Student**
-- Sign up / login (with optional profile photo), edit profile, upload a PDF resume
-- Search jobs by keyword (title, description, location, requirements **and company name**)
-- Filter by location, salary, job type, experience (+ keyword based filters for industry, work mode, education, department)
-- Paginated job lists, job details page
-- **Save / bookmark jobs** and see them on the profile page
-- Apply to a job, track the status (pending / accepted / rejected), **withdraw** a pending application
-
-**Recruiter**
-- Register companies (name, description, website, location, logo)
-- Post jobs for their own companies, see all their jobs with the **applicant count**
-- View applicants (with resume link), accept / reject
-- **Delete a job** (its applications and bookmarks are cleaned up too)
-
-## What was optimised / hardened
-
-| Area | Change |
-|---|---|
-| **Query efficiency** | Filtering, keyword search and **pagination now run in MongoDB** (`GET /job/getAllJobs`) instead of downloading every job and filtering in the browser. Lists use `.lean()`, populate only the fields the UI needs, and the count + page are fetched in parallel. |
-| **Indexes** | `Job(createdAt)`, `Job(created_by, createdAt)`, `Application(job, applicant)` **unique**, `Application(applicant, createdAt)`. |
-| **Data model** | Removed the ever-growing `Job.applications[]` array. Applications are queried from their own collection; the job page returns only `applicantCount` and `hasApplied` (no applicant data is exposed publicly anymore). |
-| **Race condition** | "Already applied" is enforced by the unique index, so double clicks / two tabs cannot create duplicate applications. |
-| **Home page** | Fetches only the 6 newest jobs (was: all jobs) and works for logged-out visitors (job list / details are public; applying requires login). |
-| **Frontend loading** | Route-level code splitting (`React.lazy`), each new request cancels the previous one (no stale results when filters change quickly), long-lived cache headers for hashed build assets. |
-| **Uploads** | 5 MB limit, type checks (image for photos/logos, PDF for resumes), images resized + auto-compressed by Cloudinary. |
-| **Security** | Rate limiting (stricter on login / register), basic security headers, body size limits, ownership checks (recruiters can only post jobs for / read their own companies), id validation (400 instead of 500), generic error messages in production, password length rules, emails stored lower-case, no email enumeration on login, env validation at start-up, proper cookie clearing on logout. |
-| **Session handling** | `GET /user/me` re-validates the persisted login on start-up; a 401 logs the user out cleanly instead of leaving a "logged in" UI that fails every request. |
-| **Ops** | `/api/health` also reports DB status, graceful shutdown on SIGTERM. |
-
-## Run locally
-
-```bash
-# 1. backend
+Engineering Highlights
+- Database-side search and pagination: Job filtering, keyword search, sorting, and pagination are performed in MongoDB rather than fetching every job to the browser.
+- Efficient query results: Uses .lean() for read-heavy queries, selects only required populated fields, and fetches the result page and total count in parallel.
+- Indexes: Includes indexes for job creation dates, recruiter job lists, and application lookups. A unique (job, applicant) index prevents duplicate applications.
+- Separate application records: Applications are stored in their own collection instead of growing an embedded array on each job.
+- Duplicate-application protection: The unique database index enforces the one-application-per-student-per-job rule, including concurrent requests.
+- Ownership checks: Recruiters can manage only companies and jobs associated with their own account.
+- Authentication/session handling: Passwords are hashed with bcrypt; JWTs are stored in HTTP-only cookies; the frontend revalidates the session through the current-user endpoint.
+- Request protection: Includes rate limiting, basic security headers, request-body size limits, ObjectId validation, and production-safe error responses.
+- Upload validation: Enforces file size and file-type checks for images and PDF resumes; image uploads are processed through Cloudinary.
+- Frontend loading: Uses route-level lazy loading and cancels superseded requests to avoid stale search results.
+- Operational handling: Includes a health endpoint that reports database connectivity and graceful shutdown handling.
+Application Structure
+JOB-HUNT/
+├── backend/
+│   ├── controllers/       # Request handlers
+│   ├── middlewares/       # Authentication, roles, uploads, validation, rate limits
+│   ├── models/            # Mongoose schemas
+│   ├── routes/            # REST API routes
+│   ├── tests/             # Backend unit tests
+│   ├── utils/             # Database, environment, Cloudinary, query helpers
+│   └── index.js           # Express application and server
+├── frontend/
+│   ├── public/
+│   └── src/
+│       ├── components/    # Pages and reusable UI components
+│       ├── hooks/
+│       ├── redux/
+│       └── ...
+├── render.yaml            # Render Blueprint
+├── package.json           # Root build, start, and test scripts
+└── README.md
+Run Locally
+Prerequisites
+- Node.js 20 or later
+- npm
+- A MongoDB database (for example, MongoDB Atlas)
+- Cloudinary credentials for profile photos, resumes, and company logos
+1. Clone the repository
+git clone https://github.com/srishti831/JOB-HUNT.git
+cd JOB-HUNT
+2. Configure the backend
 cd backend
-cp .env.example .env        # then fill MONGO_URI, SECRET_KEY, CLOUD_NAME, API_KEY, API_SECRET
+cp .env.example .env
 npm install
-npm run dev                 # http://localhost:8000
-
-# 2. frontend (new terminal)
+Fill in backend/.env:
+PORT=8000
+NODE_ENV=development
+MONGO_URI=your_mongodb_connection_string
+SECRET_KEY=your_long_random_secret
+CLOUD_NAME=your_cloudinary_cloud_name
+API_KEY=your_cloudinary_api_key
+API_SECRET=your_cloudinary_api_secret
+FRONTEND_URL=http://localhost:5173
+CROSS_SITE_COOKIE=false
+3. Configure and run the frontend
+Open a second terminal from the repository root:
 cd frontend
-cp .env.example .env        # VITE_API_URL=http://localhost:8000
+cp .env.example .env
 npm install
-npm run dev                 # http://localhost:5173
-```
+npm run dev
+Set frontend/.env to:
+VITE_API_URL=http://localhost:8000
+The local application will be available at:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8000
+4. Start the backend
+In the first terminal:
+cd backend
+npm run dev
+Keep both development servers running while using the local application.
+Environment Variables
+Do not commit real .env files or credentials. The repository includes .env.example templates for local setup.
+Backend
+Variable	Purpose
+PORT	Local backend port; the host may provide its own port in production
+NODE_ENV	development locally; the hosting platform sets production mode
+MONGO_URI	MongoDB connection string
+SECRET_KEY	Secret used to sign JWTs; use a long, random value
+CLOUD_NAME	Cloudinary cloud name
+API_KEY	Cloudinary API key
+API_SECRET	Cloudinary API secret
+FRONTEND_URL	Allowed frontend origin(s), comma-separated; used for CORS
+CROSS_SITE_COOKIE	false for same-origin hosting; true only when frontend and backend are on different sites
 
-### Tests
 
-```bash
-npm test                    # from the project root (runs the backend tests with Node's built-in test runner)
-```
+Frontend
+Variable	Purpose
+VITE_API_URL	Backend base URL. Use http://localhost:8000 locally. Leave empty for the single-origin Render deployment.
 
-Covers the job search/filter query builder (including regex escaping and pagination limits) and the rate limiter.
-Controllers and the UI are not covered by automated tests (see limitations).
 
-## Deploy
+Only expose non-secret configuration through frontend variables. Never put database credentials, JWT secrets, or Cloudinary API secrets in VITE_ variables.
+Deployment
+The live application is deployed as one Render Web Service. The Express server serves the API and the built React app from the same domain.
 
-### Option A – one service (recommended, easiest): Render / Railway
-Express serves the API and the built React app from the same domain, so cookies "just work".
+Live application: https://job-hunt-q6qd.onrender.com
 
-1. Push this folder to GitHub.
-2. Render → New → Blueprint (uses `render.yaml`) **or** New Web Service with
-   - Build command: `npm run build`
-   - Start command: `npm start`
-3. Environment variables: `NODE_ENV=production`, `MONGO_URI`, `SECRET_KEY` (32+ random characters), `CLOUD_NAME`, `API_KEY`, `API_SECRET`,
-   `VITE_API_URL` = *(empty)*, `CROSS_SITE_COOKIE=false`.
-4. MongoDB Atlas → Network Access → allow `0.0.0.0/0` (or Render's outbound IPs).
+The repository includes a render.yaml Blueprint. The root scripts are used by the deployment:
+npm run build
+npm start
+The build script installs backend and frontend dependencies and builds the Vite frontend. The start script launches the Express server, which serves frontend/dist when the production build exists.
 
-### Option B – split: frontend on Vercel/Netlify, backend on Render
-- Backend env: `FRONTEND_URL=https://your-app.vercel.app`, **`CROSS_SITE_COOKIE=true`**, `NODE_ENV=production` + the DB/Cloudinary vars.
-- Frontend (Vercel) root directory `frontend`, env `VITE_API_URL=https://your-backend.onrender.com`.
-  `vercel.json` / `public/_redirects` already handle SPA routing.
+Configure the following values in the Render service environment:
+- MONGO_URI
+- SECRET_KEY (at least 32 random characters)
+- CLOUD_NAME
+- API_KEY
+- API_SECRET
+- VITE_API_URL as an empty value for this same-origin deployment
+- CROSS_SITE_COOKIE=false
+- FRONTEND_URL=https://job-hunt-q6qd.onrender.com if explicitly configuring the allowed frontend origin
+Render supplies the runtime port and sets NODE_ENV=production for a Node web service. Do not commit production secrets to the repository.
 
-See [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) before going live.
+For MongoDB Atlas, ensure the database network access rules allow connections from the deployed service. Use the narrowest network access rule practical for your deployment.
+Render's free service may spin down after inactivity, so the first request after an idle period can take longer.
 
-## API
+API Overview
+All API routes are prefixed with /api/v1.
+Area	Method	Endpoint	Access
+Register	POST	/user/register	Public
+Login	POST	/user/login	Public
+Logout	GET	/user/logout	Public
+Current user	GET	/user/me	Authenticated
+Update profile	POST	/user/profile/update	Authenticated
+List saved jobs	GET	/user/saved	Authenticated
+Toggle saved job	POST	/user/saved/:id	Authenticated
+Register company	POST	/company/register	Recruiter
+List own companies	GET	/company/get	Recruiter
+Get company	GET	/company/get/:id	Recruiter
+Update company	PUT	/company/update/:id	Recruiter
+List/search jobs	GET	/job/getAllJobs	Public
+Get job details	GET	/job/get/:id	Public
+Post a job	POST	/job/post	Recruiter
+List own jobs	GET	/job/getadminjobs	Recruiter
+Delete own job	DELETE	/job/:id	Recruiter
+Apply to a job	GET	/application/apply/:id	Authenticated
+List own applications	GET	/application/get	Authenticated
+Withdraw application	DELETE	/application/:id	Authenticated
+View applicants	GET	/application/:id/applicants	Recruiter
+Update application status	POST	/application/status/:id/update	Recruiter
+Health check	GET	/api/health	Public
 
-| Area | Endpoints |
-|---|---|
-| Auth / user | `POST /api/v1/user/register` · `POST login` · `GET logout` · `GET me` · `POST profile/update` |
-| Saved jobs (student) | `GET /api/v1/user/saved` · `POST /api/v1/user/saved/:jobId` (toggle) |
-| Companies (recruiter) | `POST /api/v1/company/register` · `GET get` · `GET get/:id` · `PUT update/:id` (logo upload) |
-| Jobs | `GET /api/v1/job/getAllJobs` (public) · `GET get/:id` (public) · `POST post` · `GET getadminjobs` · `DELETE :id` |
-| Applications | `GET /api/v1/application/apply/:jobId` · `GET get` · `DELETE :id` (withdraw) · `GET :jobId/applicants` · `POST status/:id/update` |
-| Health | `GET /api/health` |
 
-`GET /job/getAllJobs` query params (all optional): `keyword`, `location` (comma separated), `jobType`, `salaryMin`, `salaryMax`,
-`expMin`, `expMax`, `textFilter` (repeatable), `page`, `limit` (max 50). Response: `{ jobs, pagination: { page, limit, total, totalPages } }`.
+Job search query parameters
+GET /api/v1/job/getAllJobs supports optional query parameters:
+- keyword
+- location (comma-separated)
+- jobType
+- salaryMin, salaryMax
+- expMin, expMax
+- textFilter (repeatable)
+- page
+- limit (maximum 50)
+The response includes the job results and pagination metadata: page, limit, total, and totalPages.
+Tests
+Run the backend tests from the repository root:
+npm test
+The current automated tests cover the job-query helper (including regex escaping and pagination limits) and the rate limiter. Controllers, database integration, and the frontend are not covered by the current test suite.
+Known Limitations
+- Keyword search uses case-insensitive regular expressions. For a larger dataset, MongoDB text search or Atlas Search would be more suitable.
+- Industry, work mode, education, and department filters are keyword matches against job text rather than dedicated structured fields; results may therefore be approximate.
+- Salary is represented as a single INR LPA value, and locations are free text rather than geospatial data.
+- Jobs cannot currently be edited after posting; a recruiter must delete and repost. Companies do not have a delete workflow, and jobs do not have an expiry/closed state.
+- The applicants list is capped at 500 entries per job and does not currently provide search, sorting, or pagination.
+- Authentication uses a one-day JWT cookie without refresh tokens, server-side token revocation, email verification, or password reset.
+- Rate limiting is in-memory and resets when the server restarts; it is not shared across multiple instances.
+- Security headers are a basic hand-written set; a Content Security Policy is not configured.
+- Uploaded resumes and images are stored at Cloudinary URLs. Anyone with access to a URL may be able to view that file.
+- There is no dedicated CSRF token. Cookie SameSite settings and the CORS allow-list provide the current cross-origin protections.
+- Automated test coverage is currently limited to utility-level backend tests; there are no controller, database integration, or UI tests.
+- The UI is responsive, but accessibility, SEO, and server-side rendering have not been comprehensively implemented.
+Future Improvements
+- Job editing, job closing, and expiry workflows
+- Email notifications for application status updates
+- Password reset and email verification
+- Refresh-token and session-revocation support
+- Redis-backed rate limiting for multi-instance deployments
+- Expanded integration and frontend tests
+- CI workflow for linting, tests, and production builds
+- Structured job fields and more advanced search
+Author
+Srishti Singh
 
-## Limitations
-
-Known trade-offs, deliberately left out to keep the project at a sensible size:
-
-**Search & data**
-- Keyword search uses case-insensitive regular expressions, which cannot use an index. Fine for thousands of jobs; for more, use a MongoDB text index or Atlas Search (which would also give relevance ranking).
-- The *Industry*, *Work Mode*, *Education* and *Department* filters are keyword matches on the job text, because jobs have no dedicated fields for them. They can produce false positives / negatives.
-- Salary is a single number in LPA (INR only) – no ranges or currencies. Locations are free text (no geo search).
-- Jobs cannot be edited after posting (delete and re-post), companies cannot be deleted, and there is no job expiry / "closed" state.
-- The applicants list is capped at 500 per job and has no search, sorting or pagination.
-
-**Auth & security**
-- Single JWT in an httpOnly cookie (valid 1 day): no refresh tokens, no server-side revocation, no "log out everywhere".
-- No email verification, password reset or change-password flow.
-- The rate limiter is in memory, so it resets on restart and is per instance. Use a shared store (e.g. Redis) when running several instances.
-- Security headers are a small hand-written set (no CSP). `helmet` would be the production choice.
-- Resumes and images are stored on Cloudinary under public URLs: anyone who has the link can open the file.
-- No CSRF token; protection relies on `SameSite` cookies and the CORS allow-list. With `CROSS_SITE_COOKIE=true` (`SameSite=None`) this protection is weaker.
-
-**Product**
-- No email / push notifications (students must check their profile to see a status change), no chat, no recruiter analytics, no admin role.
-- Application statuses are only pending / accepted / rejected.
-- No i18n, no SEO / server-side rendering, only basic accessibility work, and the layout is responsive but not polished for every screen size.
-
-**Engineering**
-- No automated tests for controllers, the database layer or the UI (only unit tests for the query builder and rate limiter), and no CI pipeline.
-- Responses are not compressed by Express (hosting platforms / CDNs usually do it); add the `compression` middleware if not.
-- Mongoose creates indexes automatically on start-up. That is convenient here, but large production databases should create indexes through migrations.
-- Free hosting tiers (Render, Atlas M0) may sleep or be slow on the first request.
-
-**Upgrading existing data** (only if you already have a database from an earlier version)
-- Emails are now stored lower-case; accounts registered with capital letters must be lower-cased or re-created.
-- The unique application index cannot be built while duplicate `(job, applicant)` applications exist – remove the duplicates first.
-- Phone numbers are stored as text and job `position` as a number; old values are converted when read.
-- The old `Job.applications` array is ignored (it can be removed from old documents with `$unset`).
-
-## Ideas for the future
-Job editing / closing, email notifications, `helmet` + `compression`, text index or Atlas Search, refresh tokens + password reset,
-Redis-backed rate limiting, integration tests with `mongodb-memory-server` + `supertest`, CI (GitHub Actions) that runs lint, tests and the build.
+Built as a full-stack portfolio project to practise designing, securing, testing, and deploying a MERN application.
